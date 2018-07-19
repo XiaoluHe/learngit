@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+	<?php
+	exec ('D:\phpStudy\WWW\project\extend\imageHandle\JYImg.exe');
+	$path = 'start D:\phpStudy\WWW\project\extend\imageHandle\JYImg.exe "D:\phpStudy\WWW\project\extend\imageHandle\big.jpg","D:\phpStudy\WWW\project\public\static\img\big51.jpg",1,2,3,4,5,6,7';
+	exec($path);
+    exec('start D:\phpStudy\WWW\jy\extend\imageHandle\JYImg.exe "D:\phpStudy\WWW\jy\public\upload\imgtemp\20180607101718.jpg","D:\phpStudy\WWW\project\public\upload\imgtemp\120180607101718.jpg",1,2,3,4,5,6,7');
+	 var_dump($path); echo "<br/>";
+	 $result = '20180607101718.jpg';
+	 $path1 = 'D:\phpStudy\WWW\jy\public\upload\imgtemp\\'.$result;$path2= 'D:\phpStudy\WWW\jy\public\upload\imgtemp\1'.$result;
+            $exec = 'start D:\phpStudy\WWW\jy\extend\imageHandle\JYImg.exe "'.$path1.'","'.$path2.'",1,2,3,4,5,6,7';
+            exec ($exec);
+            var_dump($exec);
+		?>
+		<div></div>
+		<img height="100" src="__static__/img/big51.jpg">
+</body>
+</html>

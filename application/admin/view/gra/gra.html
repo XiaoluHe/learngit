@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>gra</title>
+	<style type="text/css">
+		.divHandleImg {float: left;}
+	</style>
+</head>
+<body>
+	<a href="{:url('index/index')}">index页面</a>
+	<a href="{:url('gra/bootstrap')}">bootstrap</a>
+	<img src="__public__{$img}">
+	<div class="divHandleImg">
+		<div class="handleImg">反色</div>
+		<div class="handleImg">亮度扩展</div>
+		<div class="handleImg">边缘增强</div>
+		<div class="handleImg">彩色转为灰度</div>
+		<div class="handleImg">抖动</div>
+		<div class="handleImg">颜色调节</div>
+	</div>
+	<div class="img">
+		
+	</div>
+</body>
+<script type="text/javascript" src="__static__/js/jquery-2.1.0.js"></script>
+<script type="text/javascript">
+	$(".divHandleImg .handleImg").on("click",function() {
+		console.log("index::"+$(this).index());
+		var img = $("img")[0].src;
+		console.log(img);
+		var da = {"img_path":img,"index":$(this).index()};
+		console.log(da);
+		$.ajax({     
+            type: "POST",     
+            dataType: "json",     
+            url: "{:url('gra/handleImg')}",     
+            data: da,  
+            success: function (data) {
+            	console.log("++++++++++::success");
+            	$(".img").append("<img src='__public__/" + data + "'>");
+            },     
+            error: function (data) {   
+                alert("发生未知错误");   
+            }     
+        });
+	})
+</script>
+</html>

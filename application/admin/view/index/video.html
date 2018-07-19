@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<link href="__static__/admin/lib/Hui-iconfont/1.0.8/iconfont.css" rel="stylesheet" type="text/css" />
+		<style type="text/css">
+			*{margin: 0px; padding: 0px;}
+			.div_all{border: 5px solid #DBDBDB; border-radius: 8px; padding: 20px; margin-top: 10px;}
+			.div_choose_video { width: 100px; height: 30px;}
+			.div_choose_video input { width: 100%;height: 30px;}
+			.div_choose_video img {width: 100px; height: 30px; margin-top: -30px; position: absolute;}
+			.div_canvas_img { border: 1px solid #DBDBDB; border-radius: 5px;}
+			.div_choose_video .div_canvas_img img{height: 100px;}
+			.div_controlbar{ height: 30px; width: 500px; background-color: lightgray;}
+			.div_controlbar div{float: left;}
+			.div_canvas_img img{margin-right: 10px;}
+			.div_controlbar .div_play_pause {}
+			.div_progressbar{ margin-left: 20px; background: orange; width: 50%; height: 90%; /*width: 60%; height: 2px; background: lightgray; transition: height 2s; -moz-transition: height 2s;*/ /* Firefox 4 */ /*-webkit-transition: height 2s;*/ /* Safari 和 Chrome */ /*-o-transition: width 2s; Opera */ }
+			/*.div_progressbar:hover{ height:5px;}*/
+			.scale_panel { margin-left: 5%; width: 80%; line-height: 30px;} 
+			.scale_panel .r { float: right; line-height: 15px;} 
+			.scale_panel #title { float: left; line-height: 30px; width: 10%;} 
+			.scale span { background: url(__public__/uploadstemp/1525748161.png) no-repeat; width: 8px; height: 16px; position: absolute; left: -2px; top: -5px; cursor: pointer; } 
+			.scale { background-repeat: repeat-x; background-position: 0 100%; background-color: #E4E4E4; border-left: 1px #83BBD9 solid; width: 70%; margin: 0px 3%; height: 3px; position: relative; font-size: 0px; border-radius: 3px;  margin-top: 13px;} 
+			.scale div { background-repeat: repeat-x; background-color: #3BE3FF; position: absolute; height: 3px; width: 0; left: 0; bottom: 0;} 
+			.div_controlbar .fullscreen {margin-left: 5%;}
+			.div_controlbar .fullscreen img {height: 20px; margin-top: 5px;}
+			.div_play_pause i {line-height: 30px; background-color: blue;}
+			.scale_panel span.r{line-height: 30px; background-color: orange;}
+			/*li { font-size: 12px; line-height: 50px; position: relative; height: 50px; list-style: none; }*/
+		</style>
+	</head>
+	<script src="__static__/js/jquery-2.1.0.js" type="text/javascript" charset="utf-8"></script>
+	<body>
+		<div class="div_all">
+		<div class="div_choose_video">
+			<input type="file" name="input_choose_video" id="input_choose_video" value="选取视频文件" />
+			<img src="__public__/uploadstemp/Sobel.jpg">
+		</div>
+		<div class="div_loading" hidden="hidden">
+			<button type="button">dynamic</button>
+		</div>
+		<div class="div_controlbar" hidden="hidden">
+			<div class="div_play_pause">
+				<i class="Hui-iconfont">&#xe6e6;</i> 
+			</div>
+			<div class="scale_panel">
+			 	<span id="title">0</span>
+				<span class="r">100</span>
+				<div class="scale" id="bar">
+					<div></div>
+					<span id="btn"></span>
+				</div>
+			</div>
+			<div class="fullscreen">
+				<img src="__static__/img/fullscreen_alt.png">
+			</div>
+		</div>
+		<form method="post" action="{:url('index/saveimg')}">
+		<div class="div_canvas_img" hidden="hidden">
+			<input class="imgpath" hidden="hidden" type="text-align" name="imgpath">
+		</div>
+		<input type="submit" name=""></form></div>
+	</body>
+	
+	<script type="text/javascript">
+		var currentContextVideo = "";
+		var videoEle = "";
+		var triggerCondition = 0;
+		var currentVideoElem = "",currentCanvasElem="";
+		$(".div_loading").on("click","button",function() {
+			console.log("Start dynamic loading");
+			contextVideoToImg(currentContextVideo,currentVideoElem);
+		})
+		$(".div_choose_video").on("click","img",function() {
+			var inp = $(this).prev();
+			inp.click();
+			console.log("img_prev:"+inp);
+		})
+		
+		$(".div_choose_video").on("change","#input_choose_video",function() {
+			console.log("Selected file");
+			var parent = $(".div_loading");
+			console.log(this.files.length);
+			for (var m = 0; m<this.files.length; m++) {
+				var file = this.files[m];
+				var divId = "div_pic_sel"+m;
+				console.log(divId);
+				var divEle = document.createElement("div");
+				divEle.setAttribute("id",divId);
+				parent.append(divEle);
+				videoEle = document.createElement("video");
+				var videoId = "video_pic_sel"+m;
+				videoEle.setAttribute("id",videoId);
+				console.log(videoId);
+				var url = URL.createObjectURL(file);
+				console.log(url);
+				divEle.appendChild(videoEle);
+				videoEle.setAttribute('src',url);
+		        videoEle.setAttribute('loop',"loop");
+		        videoEle.setAttribute('autoplay',"autoplay");
+		        var canvasId = "canvas_pic_sel"+m;
+		        $("#video_pic_sel"+m)[0].addEventListener("loadedmetadata",function() {
+		        	console.log("时常:"+this.duration);
+		        	createCanvas(canvasId,videoId,divId,this.videoWidth,this.videoHeight);
+		        	if (videoEle!=""){
+		        		$(".div_controlbar").css({"width":this.videoWidth});
+			        	$(".div_loading").removeAttr("hidden");
+			        	$(".div_canvas_img").removeAttr("hidden");
+			        	$(".div_controlbar").removeAttr("hidden");
+			        	$(".div_controlbar").animate({"height":30},"slow");
+			        }
+		        })
+		        
+			}
+		})
+		function createCanvas(canvasId,videoId,divId,canvasWidth,canvasHeight) {
+			console.log(canvasId);
+			var videoElem = document.getElementById(videoId);
+			var canvas= document.createElement("canvas");
+			canvas.setAttribute("id",canvasId);
+			canvas.setAttribute("width",canvasWidth);
+			canvas.setAttribute("hidden","hidden");
+			canvas.setAttribute("height",canvasHeight);
+			var contextVideo=canvas.getContext('2d');
+			contextVideo.fillStyle='aliceblue';
+			contextVideo.fillRect(0,0,canvasWidth+100,canvasHeight+100);
+			var divParent = document.getElementById(divId);
+			divParent.append(canvas);
+			console.log("果然失败了");
+			currentContextVideo = contextVideo;
+			currentVideoElem = videoElem;
+			currentCanvasElem = canvas;
+		}
+		function contextVideoToImg(currentContextVideo,currentVideoElem) {
+			currentContextVideo.drawImage(currentVideoElem,0,0);
+			convertCanvasToImage(currentCanvasElem);
+		}
+		function convertCanvasToImage(canvas) {  
+		    //新Image对象，可以理解为DOM  
+		    var imgEle = document.createElement("img");
+		    // canvas.toDataURL 返回的是一串Base64编码的URL
+		    // 指定格式 PNG
+		   	var srcImg = canvas.toDataURL("image/png");
+		    imgEle.setAttribute("height",100);
+			imgEle.setAttribute("src",srcImg);
+		   	var div = document.getElementsByClassName("div_canvas_img")[0];
+		   	var imgVal = $(".div_canvas_img .imgpath").val();
+		   	if (imgVal!="") {imgVal=imgVal+","+srcImg;} else { imgVal = srcImg;}
+		   	$(".div_canvas_img .imgpath").attr("value",imgVal);
+		   	div.appendChild(imgEle); 
+		}
+		$(".div_loading").on("click","",function() {
+			console.log("video悬停事件触发");
+		})
+		//video控件的触发事件
+		$(".div_controlbar").on("click",".div_play_pause",function() {
+			console.log("play and pause");
+			var div_play_pause = $(".div_play_pause");
+			console.log(div_play_pause);
+			if (videoEle.paused) {
+				div_play_pause.html('<i class="Hui-iconfont">&#xe6e6;</i>');
+				videoEle.play();
+			} else {
+				div_play_pause.html('<i class="Hui-iconfont">&#xe6e5;</i>');
+				videoEle.pause();
+			}
+		})
+		//2.制作显示全屏，点击全屏按钮
+	    $(".fullscreen").click(function () {
+	    	console.log("全屏事件触发");
+	    	if (videoEle!="") {
+				var video = videoEle;
+		        //能力测试
+		        if (video.requestFullScreen) {
+		            video.requestFullScreen();
+		        }
+		        else if (video.webkitRequestFullScreen) {
+		            video.webkitRequestFullScreen();
+		        }
+		        else if (video.mozRequestFullScreen) {
+		            video.mozRequestFullScreen();
+		        }
+		        else if (video.msRequestFullScreen) {
+		            video.msRequestFullScreen();
+		        }
+			}
+	    	
+	    });
+		scale = function(btn, bar, title) {
+			this.btn = document.getElementById(btn);
+			this.bar = document.getElementById(bar);
+			this.title = document.getElementById(title);
+			this.step = this.bar.getElementsByTagName("DIV")[0];
+			this.init();
+		};
+		scale.prototype = {
+			init: function() {
+				var f = this,
+					g = document,
+					b = window,
+					m = Math;
+				f.btn.onmousedown = function(e) {
+					var x = (e || b.event).clientX;
+					var l = this.offsetLeft;
+					var max = f.bar.offsetWidth - this.offsetWidth;
+					videoEle.pause();
+					var div_play_pause = $(".div_play_pause");
+					div_play_pause.html("<i class='Hui-iconfont'>&#xe6e5;</i>");
+					console.log(videoEle);
+					g.onmousemove = function(e) {
+						var thisX = (e || b.event).clientX;
+						var to = m.min(max, m.max(-2, l + (thisX - x)));
+						f.btn.style.left = to + 'px';
+						f.ondrag(m.round(m.max(0, to / max) * 100), to);
+						b.getSelection ? b.getSelection().removeAllRanges() : g.selection.empty();
+					};
+					g.onmouseup = new Function('this.onmousemove=null');
+				};
+			},
+			ondrag: function(pos, x) {
+				console.log("pos:"+pos);
+				console.log("x:"+x);
+				videoEle.currentTime = videoEle.duration*pos*0.01;
+				console.log(videoEle.currentTime);
+				this.step.style.width = Math.max(0, x) + 'px';
+				this.title.innerHTML = pos + '%';
+			}
+		}
+		new scale('btn', 'bar', 'title');
+	</script>
+</html>
